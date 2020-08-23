@@ -1,5 +1,6 @@
 import 'dart:html';
 
+import 'package:bitcoin_ticker/networking.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +13,7 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
+  var coin = 'BTC';
 
   List<Widget> getDropDownItems() {
     List<Text> dropDownList = [];
@@ -21,7 +23,16 @@ class _PriceScreenState extends State<PriceScreen> {
         style: TextStyle(color: Colors.white),
       ));
     }
-    if (Platform.isAndroid) return dropDownList;
+//    if (Platform.isAndroid)
+    return dropDownList;
+  }
+
+  Future<dynamic> getExchangeRate(var coin, var selectedCurrency) async {
+    var url =
+        'http://rest.coinapi.io/v1/exchangerate/$coin/$selectedCurrency?apikey=2C099656-D363-4C1E-BDBA-5039B8A78434#';
+    NetworkHelper networkHelper = NetworkHelper(url);
+    var exchangeData = networkHelper.getData();
+    return exchangeData;
   }
 
   @override
