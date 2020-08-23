@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +21,7 @@ class _PriceScreenState extends State<PriceScreen> {
         style: TextStyle(color: Colors.white),
       ));
     }
-    return dropDownList;
+    if (Platform.isAndroid) return dropDownList;
   }
 
   @override
