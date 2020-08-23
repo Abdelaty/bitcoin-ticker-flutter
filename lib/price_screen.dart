@@ -1,6 +1,3 @@
-import 'dart:html';
-
-import 'package:bitcoin_ticker/networking.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -12,8 +9,8 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  String selectedCurrency = 'USD';
-  var coin = 'BTC';
+  String selectedCurrency;
+  var rate;
 
   List<Widget> getDropDownItems() {
     List<Text> dropDownList = [];
@@ -23,21 +20,15 @@ class _PriceScreenState extends State<PriceScreen> {
         style: TextStyle(color: Colors.white),
       ));
     }
-//    if (Platform.isAndroid)
-    return dropDownList;
-  }
 
-  Future<dynamic> getExchangeRate(var coin, var selectedCurrency) async {
-    var url =
-        'http://rest.coinapi.io/v1/exchangerate/$coin/$selectedCurrency?apikey=2C099656-D363-4C1E-BDBA-5039B8A78434#';
-    NetworkHelper networkHelper = NetworkHelper(url);
-    var exchangeData = networkHelper.getData();
-    return exchangeData;
+    return dropDownList;
   }
 
   @override
   Widget build(BuildContext context) {
     getDropDownItems();
+    CoinData coinData = CoinData();
+    rate = coinData.getResponse(selectedCurrency);
     return Scaffold(
       appBar: AppBar(
         title: Text('🤑 Coin Ticker'),
@@ -46,30 +37,9 @@ class _PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 BTC = ? USD',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          ListOfCards(),
           Container(
             height: 150.0,
-            alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
             color: Colors.lightBlue,
             child: CupertinoPicker(
@@ -77,12 +47,66 @@ class _PriceScreenState extends State<PriceScreen> {
                 itemExtent: 32.0,
                 onSelectedItemChanged: (selectedIndex) {
                   setState(() {
-//                    selectedCurrency = value;
+                    selectedCurrency = currenciesList[selectedIndex];
+                    print(selectedCurrency);
                   });
                 },
                 children: getDropDownItems()),
           ),
         ],
+      ),
+    );
+  }
+
+  Column ListOfCards() {
+    List<CoinCard> cardsList = [];
+    for (String item in cryptoList) {
+      cardsList.add(
+        CoinCard(
+          cryptoCurrency: item,
+          selectedCurrency: selectedCurrency,
+          rate: rate,
+        ),
+      );
+    }
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch, children: cardsList);
+  }
+}
+
+class CoinCard extends StatelessWidget {
+  const CoinCard({
+    Key key,
+    @required this.rate,
+    @required this.selectedCurrency,
+    @required this.cryptoCurrency,
+  }) : super(key: key);
+
+  final rate;
+  final String selectedCurrency;
+  final cryptoCurrency;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        color: Colors.lightBlueAccent,
+        elevation: 5.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+          child: Text(
+            '1 $cryptoCurrency = $rate $selectedCurrency',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 20.0,
+              color: Colors.white,
+            ),
+          ),
+        ),
       ),
     );
   }
