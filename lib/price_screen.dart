@@ -9,8 +9,9 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  String selectedCurrency;
+  String selectedCurrency = 'USD';
   var rate;
+  var coinMap;
 
   List<Widget> getDropDownItems() {
     List<Text> dropDownList = [];
@@ -27,8 +28,7 @@ class _PriceScreenState extends State<PriceScreen> {
   @override
   Widget build(BuildContext context) {
     getDropDownItems();
-    CoinData coinData = CoinData();
-    rate = coinData.getResponse(selectedCurrency);
+    getRate();
     return Scaffold(
       appBar: AppBar(
         title: Text('🤑 Coin Ticker'),
@@ -37,7 +37,7 @@ class _PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          ListOfCards(),
+          listOfCards(),
           Container(
             height: 150.0,
             padding: EdgeInsets.only(bottom: 30.0),
@@ -48,7 +48,7 @@ class _PriceScreenState extends State<PriceScreen> {
                 onSelectedItemChanged: (selectedIndex) {
                   setState(() {
                     selectedCurrency = currenciesList[selectedIndex];
-                    print(selectedCurrency);
+                    getRate();
                   });
                 },
                 children: getDropDownItems()),
@@ -58,19 +58,26 @@ class _PriceScreenState extends State<PriceScreen> {
     );
   }
 
-  Column ListOfCards() {
+  Future<void> getRate() async {
+    CoinData coinData = CoinData();
+    coinMap = await coinData.getResponse(selectedCurrency);
+  }
+
+  Column listOfCards() {
     List<CoinCard> cardsList = [];
     for (String item in cryptoList) {
       cardsList.add(
         CoinCard(
           cryptoCurrency: item,
           selectedCurrency: selectedCurrency,
-          rate: rate,
+          rate: coinMap[item],
         ),
       );
     }
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch, children: cardsList);
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: cardsList,
+    );
   }
 }
 
